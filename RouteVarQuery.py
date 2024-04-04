@@ -1,7 +1,20 @@
 import json
+import os
 from rich import print
 from enum import Enum
 
+
+class Keys(Enum):
+    ROUTEID = "_RouteId"
+    ROUTEVARID = "_RouteVarId"
+    ROUTEVARNAME = "_RouteVarName"
+    ROUTEVARSHORTNAME = "_RouteVarShortName"
+    ROUTENO = "_RouteNo"
+    STARTSTOP = "_StartStop"
+    ENDSTOP = "_EndStop"
+    DISTANCE = "_Distance"
+    OUTBOUND = "_Outbound"
+    RUNNINGTIME = "_RunningTime"
 
 class RouteVar:
     def __init__(self):
@@ -101,7 +114,7 @@ class RouteVarQuery:
         self._fileName = fileName
 
     def readFromJSON(self):
-        file = open(file='vars.json', encoding='utf-8')
+        file = open(os.path.normpath(os.path.dirname(__file__) + "/data/" + self._fileName), encoding='utf-8')
         data = []
         for line in file:
             routeVar = RouteVar()
@@ -146,25 +159,88 @@ class RouteVarQuery:
                 
             pass
         
-        return items
-
-class Keys(Enum):
-    ROUTEID = "_RouteId"
-    ROUTEVARID = "_RouteVarId"
-    ROUTEVARNAME = "_RouteVarName"
-    ROUTEVARSHORTNAME = "_RouteVarShortName"
-    ROUTENO = "_RouteNo"
-    STARTSTOP = "_StartStop"
-    ENDSTOP = "_EndStop"
-    DISTANCE = "_Distance"
-    OUTBOUND = "_Outbound"
-    RUNNINGTIME = "_RunningTime"
+        self._data = items
+        return self
     
-routeVarQuery = RouteVarQuery()
-routeVarQuery.readFromJSON()
+    def outputAsJSON(self, items : list[RouteVar] = []):
+        if (len(items) == 0):
+            items = self._data
+            
+        dataFolder = 'data'
+        os.makedirs(dataFolder, exist_ok=True)
+        
+        with open(os.path.normpath(os.path.dirname(__file__) + "/" + dataFolder + "/sample.json"), "w", encoding='utf8') as outfile:
+            for item in items:
+                for i in range(0, len(item.GetRouteVarId())):
+                    diction = {}
+                    diction[Keys.ROUTEID.value[1:]] = item.GetRouteId()
+                    
+                    diction[Keys.ROUTEVARID.value[1:]] = item.GetRouteVarId()[i]
+                    diction[Keys.ROUTEVARNAME.value[1:]] = item.GetRouteVarName()[i]
+                    diction[Keys.ROUTEVARSHORTNAME.value[1:]] = item.GetRouteVarShortName()[i]
+                    diction[Keys.ROUTENO.value[1:]] = item.GetRouteNo()[i]
+                    diction[Keys.STARTSTOP.value[1:]] = item.GetStartStop()[i]
+                    diction[Keys.ENDSTOP.value[1:]] = item.GetEndStop()[i]
+                    diction[Keys.DISTANCE.value[1:]] = item.GetDistance()[i]
+                    diction[Keys.OUTBOUND.value[1:]] = item.GetOutbound()[i]
+                    diction[Keys.RUNNINGTIME.value[1:]] = item.GetRunningTime()[i]
+                    
+                    json_object = json.dumps(diction, ensure_ascii=False)
+                    
+                    outfile.write(json_object)
+                    outfile.write("\n")
+                    
+    def outputAsCSV(self, items : list[RouteVar] = []):
+        if (len(items) == 0):
+            items = self._data
+            
+        dataFolder = 'data'
+        os.makedirs(dataFolder, exist_ok=True)
+        
+        with open(os.path.normpath(os.path.dirname(__file__) + "/" + dataFolder + "/sample.csv"), "w", encoding='utf8') as outfile:
+            firstColumn = True
+            for key in Keys:
+                if not firstColumn:
+                    outfile.write(",")
+                    
+                outfile.write(key.value[1:])
+                firstColumn = False
+            
+            outfile.write("\n")
+                
+            for item in items:
+                for i in range(0, len(item.GetRouteVarId())):
+                    outfile.write(str(item.GetRouteId()))
+                    
+                    outfile.write("," + str(item.GetRouteVarId()[i]))
+                    outfile.write("," + str(item.GetRouteVarName()[i]))
+                    outfile.write("," + str(item.GetRouteVarShortName()[i]))
+                    outfile.write("," + str(item.GetRouteNo()[i]))
+                    outfile.write("," + str(item.GetStartStop()[i]))
+                    outfile.write("," + str(item.GetEndStop()[i]))
+                    outfile.write("," + str(item.GetDistance()[i]))
+                    outfile.write("," + str(item.GetOutbound()[i]))
+                    outfile.write("," + str(item.GetRunningTime()[i]))
+                    
+                    outfile.write("\n")
+                    
+            
+    
+if __name__ == "__main__":
+    routeVarQuery = RouteVarQuery()
+    routeVarQuery.readFromJSON()
 
-data = routeVarQuery.searchByKey(Keys.STARTSTOP.value, "Bến xe buýt Sài Gòn")
+    data = routeVarQuery.searchByKey(Keys.STARTSTOP.value, "Bến xe buýt Sài Gòn").GetList()
 
-# print(len(data))
-# for d in data:
-#     print(d.dict())
+    print(len(data))
+    
+    routeVarQuery.outputAsCSV()
+    routeVarQuery.outputAsJSON()
+    
+    # with open("thing.csv", "w", encoding='utf8') as outfile:
+    #     for key in Keys:
+    #         outfile.write(key.value)
+    #         outfile.write(",")
+    
+    # for d in data:
+    #     print(d.dict())
