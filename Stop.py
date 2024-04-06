@@ -1,5 +1,6 @@
 import json
 import os
+import unicodedata
 from rich import print
 from enum import Enum
 
@@ -24,38 +25,21 @@ class Keys(Enum):
 
 class Stop:
     def __init__(self) -> None:
-        self._RouteId = -1
-        self._RouteVarId = -1
-        
-        self._StopId = []
-        self._Code = []
-        self._Name = []
-        self._StopType = []
-        self._Zone = []
-        self._Ward = []
-        self._AddressNo = []
-        self._Street = []
-        self._SupportDisability = []
-        self._Status = []
-        self._Lng = []
-        self._Lat = []
-        self._Search = []
-        self._Routes = []
-    
-    def dict(self):
-        return self.__dict__
-    
-    def GetRouteId(self):
-        return self._RouteId 
-        
-    def SetRouteId(self, RouteId):
-        self._RouteId = RouteId
-        
-    def GetRouteVarId(self):
-        return self._RouteVarId 
-        
-    def SetRouteVarId(self, RouteVarId):
-        self._RouteVarId = RouteVarId
+        self._StopId = -1
+        self._Code = -1
+        self._Name = -1
+        self._StopType = -1
+        self._Zone = -1
+        self._Ward = -1
+        self._AddressNo = -1
+        self._Street = -1
+        self._SupportDisability = -1
+        self._Status = -1
+        self._Lng = -1
+        self._Lat = -1
+        self._Search = -1
+        self._Routes = -1
+        pass
     
     def GetStopId(self):
         return self._StopId 
@@ -140,12 +124,131 @@ class Stop:
         
     def SetRoutes(self, Routes):
         self._Routes = Routes
+
+class VarStop:
+    def __init__(self) -> None:
+        self._RouteId = -1
+        self._RouteVarId = -1
+        
+        self._StopId = []
+        self._Code = []
+        self._Name = []
+        self._StopType = []
+        self._Zone = []
+        self._Ward = []
+        self._AddressNo = []
+        self._Street = []
+        self._SupportDisability = []
+        self._Status = []
+        self._Lng = []
+        self._Lat = []
+        self._Search = []
+        self._Routes = []
+    
+    def dict(self):
+        return self.__dict__
+    
+    def GetRouteId(self):
+        return self._RouteId 
+        
+    def SetRouteId(self, RouteId):
+        self._RouteId = RouteId
+        
+    def GetRouteVarId(self):
+        return self._RouteVarId 
+        
+    def SetRouteVarId(self, RouteVarId):
+        self._RouteVarId = RouteVarId
+    
+    def GetAllStopId(self):
+        return self._StopId 
+        
+    def SetAllStopId(self, StopId):
+        self._StopId = StopId
+    
+    def GetAllCode(self):
+        return self._Code 
+        
+    def SetAllCode(self, Code):
+        self._Code = Code
+    
+    def GetAllName(self):
+        return self._Name 
+        
+    def SetAllName(self, Name):
+        self._Name = Name
+    
+    def GetAllStopType(self):
+        return self._StopType 
+        
+    def SetStopType(self, StopType):
+        self._StopType = StopType
+    
+    def GetAllZone(self):
+        return self._Zone 
+        
+    def SetZone(self, Zone):
+        self._Zone = Zone
+    
+    def GetAllWard(self):
+        return self._Ward 
+        
+    def SetWard(self, Ward):
+        self._Ward = Ward
+    
+    def GetAllAddressNo(self):
+        return self._AddressNo 
+        
+    def SetAddressNo(self, AddressNo):
+        self._AddressNo = AddressNo
+    
+    def GetAllStreet(self):
+        return self._Street 
+        
+    def SetStreet(self, Street):
+        self._Street = Street
+    
+    def GetAllSupportDisability(self):
+        return self._SupportDisability 
+        
+    def SetSupportDisability(self, SupportDisability):
+        self._SupportDisability = SupportDisability
+    
+    def GetAllStatus(self):
+        return self._Status 
+        
+    def SetStatus(self, Status):
+        self._Status = Status
+    
+    def GetAllLng(self):
+        return self._Lng 
+        
+    def SetLng(self, Lng):
+        self._Lng = Lng
+    
+    def GetAllLat(self):
+        return self._Lat 
+        
+    def SetLat(self, Lat):
+        self._Lat = Lat
+    
+    def GetAllSearch(self):
+        return self._Search 
+        
+    def SetSearch(self, Search):
+        self._Search = Search
+    
+    def GetAllRoutes(self):
+        return self._Routes 
+        
+    def SetRoutes(self, Routes):
+        self._Routes = Routes
         
         
-class StopQuery:
+class VarStopQuery:
     def __init__(self, fileName="stops.json"):
         self._fileName = fileName
-        self._data : list[Stop] = []
+        self._data : list[VarStop] = []
         
     def GetList(self):
         return self._data
@@ -161,30 +264,30 @@ class StopQuery:
         
     def readFromJSON(self):
         file = open(os.path.normpath(os.path.dirname(__file__) + "/data/" + self._fileName), encoding='utf-8')
-        data : list[Stop] = []
+        data : list[VarStop] = []
         for line in file:
-            stop = Stop()
+            stop = VarStop()
             jsonList = json.loads(line)
-            
-            stops = jsonList['Stops']
             
             stop.SetRouteId(jsonList['RouteId'])
             stop.SetRouteVarId(jsonList['RouteVarId'])
+            
+            stops = jsonList['Stops']
             for st in stops:
-                stop.GetStopId().append(st['StopId'])
-                stop.GetCode().append(st['Code'])
-                stop.GetName().append(st['Name'])
-                stop.GetStopType().append(st['StopType'])
-                stop.GetZone().append(st['Zone'])
-                stop.GetWard().append(st['Ward'])
-                stop.GetAddressNo().append(st['AddressNo'])
-                stop.GetStreet().append(st['Street'])
-                stop.GetSupportDisability().append(st['SupportDisability'])
-                stop.GetStatus().append(st['Status'])
-                stop.GetLng().append(st['Lng'])
-                stop.GetLat().append(st['Lat'])
-                stop.GetSearch().append(st['Search'])
-                stop.GetRoutes().append(st['Routes'])
+                stop.GetAllStopId().append(st['StopId'])
+                stop.GetAllCode().append(st['Code'])
+                stop.GetAllName().append(st['Name'])
+                stop.GetAllStopType().append(st['StopType'])
+                stop.GetAllZone().append(st['Zone'])
+                stop.GetAllWard().append(st['Ward'])
+                stop.GetAllAddressNo().append(st['AddressNo'])
+                stop.GetAllStreet().append(st['Street'])
+                stop.GetAllSupportDisability().append(st['SupportDisability'])
+                stop.GetAllStatus().append(st['Status'])
+                stop.GetAllLng().append(st['Lng'])
+                stop.GetAllLat().append(st['Lat'])
+                stop.GetAllSearch().append(st['Search'])
+                stop.GetAllRoutes().append(st['Routes'])
                 
             
             data.append(stop)
@@ -193,8 +296,9 @@ class StopQuery:
         return data
     
     def searchByKey(self, key = "", value = ""):
-        items : list[Stop] = []
-
+        items : list[VarStop] = []
+        
+        value = unicodedata.normalize("NFC", value)
 
         if (key == ""):
             return items;
@@ -203,20 +307,25 @@ class StopQuery:
             if isinstance(routeVar.dict()[key], list):
                 # print("A list")
                 for i in routeVar.dict()[key]:
-                    if i == value:
+                    if unicodedata.normalize("NFC", str(i)) == value:
+                        print(str(i) + "," + value)
+                        print(unicodedata.normalize("NFC", str(i)) == value)
                         items.append(routeVar)
                         break;
             else:
                 # print("Not a list")
-                if routeVar.dict()[key] == value:
+                # print(str(routeVar.dict()[key]) + "," + value)
+                if unicodedata.normalize("NFC", str(routeVar.dict()[key])) == value:
                     items.append(routeVar)
                 
             pass
         
-        self._data = items
-        return self
+        # self._data = items
+        newInstance = VarStopQuery()
+        newInstance.SetList(items)
+        return newInstance
     
-    def outputAsJSON(self, items : list[Stop] = []):
+    def outputAsJSON(self, items : list[VarStop] = []):
         if (len(items) == 0):
             items = self._data
             
@@ -225,32 +334,32 @@ class StopQuery:
         
         with open(os.path.normpath(os.path.dirname(__file__) + "/" + dataFolder + "/stops_filtered.json"), "w", encoding='utf8') as outfile:
             for item in items:
-                for i in range(0, len(item.GetStopId())):
+                for i in range(0, len(item.GetAllStopId())):
                     diction = {}
                     diction[Keys.ROUTEID.value[1:]] = item.GetRouteId()
                     diction[Keys.ROUTEVARID.value[1:]] = item.GetRouteVarId()
                     
-                    diction[Keys.STOPID.value[1:]] = item.GetStopId()[i]
-                    diction[Keys.CODE.value[1:]] = item.GetCode()[i]
-                    diction[Keys.NAME.value[1:]] = item.GetName()[i]
-                    diction[Keys.STOPID.value[1:]] = item.GetStopType()[i]
-                    diction[Keys.ZONE.value[1:]] = item.GetZone()[i]
-                    diction[Keys.WARD.value[1:]] = item.GetWard()[i]
-                    diction[Keys.ADDRESSNO.value[1:]] = item.GetAddressNo()[i]
-                    diction[Keys.STREET.value[1:]] = item.GetStreet()[i]
-                    diction[Keys.SUPPORTDISABILITY.value[1:]] = item.GetSupportDisability()[i]
-                    diction[Keys.STATUS.value[1:]] = item.GetStatus()[i]
-                    diction[Keys.LNG.value[1:]] = item.GetLng()[i]
-                    diction[Keys.LAT.value[1:]] = item.GetLat()[i]
-                    diction[Keys.SEARCH.value[1:]] = item.GetSearch()[i]
-                    diction[Keys.ROUTES.value[1:]] = item.GetRoutes()[i]
+                    diction[Keys.STOPID.value[1:]] = item.GetAllStopId()[i]
+                    diction[Keys.CODE.value[1:]] = item.GetAllCode()[i]
+                    diction[Keys.NAME.value[1:]] = item.GetAllName()[i]
+                    diction[Keys.STOPID.value[1:]] = item.GetAllStopType()[i]
+                    diction[Keys.ZONE.value[1:]] = item.GetAllZone()[i]
+                    diction[Keys.WARD.value[1:]] = item.GetAllWard()[i]
+                    diction[Keys.ADDRESSNO.value[1:]] = item.GetAllAddressNo()[i]
+                    diction[Keys.STREET.value[1:]] = item.GetAllStreet()[i]
+                    diction[Keys.SUPPORTDISABILITY.value[1:]] = item.GetAllSupportDisability()[i]
+                    diction[Keys.STATUS.value[1:]] = item.GetAllStatus()[i]
+                    diction[Keys.LNG.value[1:]] = item.GetAllLng()[i]
+                    diction[Keys.LAT.value[1:]] = item.GetAllLat()[i]
+                    diction[Keys.SEARCH.value[1:]] = item.GetAllSearch()[i]
+                    diction[Keys.ROUTES.value[1:]] = item.GetAllRoutes()[i]
                     
                     json_object = json.dumps(diction, ensure_ascii=False)
                     
                     outfile.write(json_object)
                     outfile.write("\n")
             
-    def outputAsCSV(self, items : list[Stop] = []):
+    def outputAsCSV(self, items : list[VarStop] = []):
         if (len(items) == 0):
             items = self._data
             
@@ -269,37 +378,39 @@ class StopQuery:
             outfile.write("\n")
             
             for item in items:
-                for i in range(0, len(item.GetStopId())):
+                for i in range(0, len(item.GetAllStopId())):
                     outfile.write(str(item.GetRouteId()))
                     outfile.write("," + str(item.GetRouteVarId()))
                 
-                    outfile.write("," + str(item.GetStopId()[i]))
-                    outfile.write("," + str(item.GetCode()[i]))
-                    outfile.write("," + str(item.GetName()[i]))
-                    outfile.write("," + str(item.GetStopType()[i]))
-                    outfile.write("," + str(item.GetZone()[i]))
-                    outfile.write("," + str(item.GetWard()[i]))
-                    outfile.write("," + str(item.GetAddressNo()[i]))
-                    outfile.write("," + str(item.GetStreet()[i]))
-                    outfile.write("," + str(item.GetSupportDisability()[i]))
-                    outfile.write("," + str(item.GetStatus()[i]))
-                    outfile.write("," + str(item.GetLng()[i]))
-                    outfile.write("," + str(item.GetLat()[i]))
-                    outfile.write("," + str(item.GetSearch()[i]))
-                    outfile.write(",\"" + str(item.GetRoutes()[i]) + "\"")
+                    outfile.write("," + str(item.GetAllStopId()[i]))
+                    outfile.write("," + str(item.GetAllCode()[i]))
+                    outfile.write("," + str(item.GetAllName()[i]))
+                    outfile.write("," + str(item.GetAllStopType()[i]))
+                    outfile.write("," + str(item.GetAllZone()[i]))
+                    outfile.write("," + str(item.GetAllWard()[i]))
+                    outfile.write("," + str(item.GetAllAddressNo()[i]))
+                    outfile.write("," + str(item.GetAllStreet()[i]))
+                    outfile.write("," + str(item.GetAllSupportDisability()[i]))
+                    outfile.write("," + str(item.GetAllStatus()[i]))
+                    outfile.write("," + str(item.GetAllLng()[i]))
+                    outfile.write("," + str(item.GetAllLat()[i]))
+                    outfile.write("," + str(item.GetAllSearch()[i]))
+                    outfile.write(",\"" + str(item.GetAllRoutes()[i]) + "\"")
                     
                     outfile.write("\n")
             
 if __name__ == "__main__":
-    stopQr = StopQuery()
-    (len(stopQr.readFromJSON()))
-
-    query = stopQr.searchByKey(Keys.ROUTEID.value, '3').GetList()
+    query = VarStopQuery()
     
-    # print(query[0].dict())
+    query.readFromJSON()
+    # stopQr.
+    print(len(query.GetList()))
 
-    # print(query[0])
-    print(len(query))
+    datadata = query.searchByKey("_StopId", '35').GetList()
     
-    stopQr.outputAsCSV()
-    stopQr.outputAsJSON()
+    print(len(datadata))
+    
+    print(datadata[0].dict())
+    
+    # stopQr.outputAsCSV()
+    # stopQr.outputAsJSON()

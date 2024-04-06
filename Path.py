@@ -1,5 +1,6 @@
 import json
 import os
+import unicodedata
 from rich import print
 from enum import Enum
 
@@ -17,7 +18,7 @@ class Path:
         self._lat = []
         self._lng = []
     
-    def dic(self):
+    def dict(self):
         return self.__dict__
     
     def GetRouteId(self):
@@ -83,6 +84,7 @@ class PathQuery:
     def searchByKey(self, key = "", value = ""):
         items : list[Path] = []
 
+        value = unicodedata.normalize("NFC", value)
 
         if (key == ""):
             return items;
@@ -91,18 +93,20 @@ class PathQuery:
             if isinstance(routeVar.dict()[key], list):
                 # print("A list")
                 for i in routeVar.dict()[key]:
-                    if i == value:
+                    if unicodedata.normalize("NFC", str(i)) == value:
                         items.append(routeVar)
                         break;
             else:
                 # print("Not a list")
-                if routeVar.dict()[key] == value:
+                if unicodedata.normalize("NFC", str(routeVar.dict()[key])) == value:
                     items.append(routeVar)
                 
             pass
         
-        self._data = items
-        return self
+        # self._data = items
+        newInstance = PathQuery()
+        newInstance.SetList(items)
+        return newInstance
     
     def outputAsJSON(self, items : list[Path] = []):
         if (len(items) == 0):

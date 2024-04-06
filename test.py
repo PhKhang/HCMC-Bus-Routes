@@ -1,171 +1,70 @@
 import json
 import os
+import Path
+import Stop
+from rich import print
 
-fileContent = {
+empty = {
   "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "properties": {
-        "name": "Japan Vietnam Festival 2024",
-        "marker-color": "#01139d",
-        "marker-size": "medium",
-        "marker-symbol": "circle"
-      },
-      "geometry": {
-        "coordinates": [
-          106.69134756127056,
-          10.768558924779256
-        ],
-        "type": "Point"
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "name": "I.44 of VNU-HCMUS",
-        "marker-color": "#c22424",
-        "marker-size": "medium",
-        "marker-symbol": "circle-stroked"
-      },
-      "geometry": {
-        "coordinates": [
-          106.68226060953151,
-          10.762686023024031
-        ],
-        "type": "Point"
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {},
-      "geometry": {
-        "coordinates": [
-          [
-            106.68245923626756,
-            10.76281107052776
-          ],
-          [
-            106.68271072492371,
-            10.762908132602448
-          ],
-          [
-            106.68185746060209,
-            10.765219939819431
-          ],
-          [
-            106.68192931442132,
-            10.76564347502655
-          ]
-        ],
-        "type": "LineString"
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {},
-      "geometry": {
-        "coordinates": [
-          [
-            106.68192930033331,
-            10.765650250750042
-          ],
-          [
-            106.68461457648783,
-            10.768314414944442
-          ],
-          [
-            106.68818932555871,
-            10.766681015012821
-          ],
-          [
-            106.68826172317273,
-            10.766607682945533
-          ],
-          [
-            106.68838988089465,
-            10.766664338691996
-          ],
-          [
-            106.68831298626151,
-            10.766790240313426
-          ],
-          [
-            106.68861217062181,
-            10.767519965455776
-          ],
-          [
-            106.688931988386,
-            10.768067258152456
-          ],
-          [
-            106.68995917476047,
-            10.768431553321363
-          ],
-          [
-            106.6911819589294,
-            10.768923709810906
-          ],
-          [
-            106.69134345872595,
-            10.768580495501269
-          ],
-          [
-            106.69130390775564,
-            10.768664680179839
-          ]
-        ],
-        "type": "LineString"
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "name": "Vòng xoay"
-      },
-      "geometry": {
-        "coordinates": [
-          [
-            [
-              106.69179020268433,
-              10.768803168393319
-            ],
-            [
-              106.69178193061634,
-              10.768723936089714
-            ],
-            [
-              106.69185844723793,
-              10.768667051345005
-            ],
-            [
-              106.69194943997599,
-              10.76870158851267
-            ],
-            [
-              106.69195150799334,
-              10.76879910519942
-            ],
-            [
-              106.69187499137192,
-              10.768843800333656
-            ],
-            [
-              106.69179020268433,
-              10.768803168393319
-            ]
-          ]
-        ],
-        "type": "Polygon"
-      },
-      "id": 4
-    }
-  ]
+  "features": []
 }
 
-def writeGeoJson():
+def addPoint(dic, lng, lat, name = "", color = "", size = "", symbol = ""):
+    template = {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [lng, lat],
+        "type": "Point"
+      }
+    }
+    
+    if (name != ""):
+        template['properties']['name'] = name
+      
+    if (color != ""):
+        template['properties']['marker-color'] = color
+        
+    if (size != ""):
+        template['properties']['marker-size'] = size
+        
+    if (symbol != ""):
+        template['properties']['marker-symbol'] = symbol
+        
+    dic['features'].append(template)
+
+def addLine(dic, lng, lat, name = "", color = "", size = "", symbol = ""):
+    template = {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [],
+        "type": "LineString"
+      }
+    }
+    
+    if (name != ""):
+        template['properties']['name'] = name
+      
+    if (color != ""):
+        template['properties']['marker-color'] = color
+        
+    if (size != ""):
+        template['properties']['marker-size'] = size
+        
+    if (symbol != ""):
+        template['properties']['marker-symbol'] = symbol
+        
+    for i in range(len(lat)):
+        template['geometry']['coordinates'].append([lng[i], lat[i]])
+        
+    dic['features'].append(template)
+
+
+
+def writeGeoJson(content):
     with open(os.path.normpath(os.path.dirname(__file__) + "/geoJson.json"), 'w') as file:
-        file.write(json.dumps(fileContent, indent=4))
+        file.write(json.dumps(content, indent=4))
         
     print("Wrote to file successfully")
 
@@ -176,8 +75,40 @@ def loadGeoJson():
     url = "http://geojson.io/#data=data:application/json," + str(data)
     url = url.replace("\'", "\"")
     print(url)
+    # os.startfile(url)
     
 
-writeGeoJson()
-loadGeoJson()    
+if __name__ == "__main__":
+    query = Path.PathQuery()
+    query.readFromJSON()
+    
+    query.searchByKey(Path.Keys.ROUTEVARID.value, "5")
+    
+    print(len(query.GetList()))
+    
+    qr = Stop.VarStopQuery()
+    qr.readFromJSON()
+    qr.searchByKey(Stop.Keys.ROUTEVARID.value, "5")
+    
+    # print(len(qr.GetList()))
+    index = 0
+    for pathPoint in query.GetList():
+      for i in range(len(pathPoint.Getlat())):
+        addPoint(empty, pathPoint.Getlng()[i], pathPoint.Getlat()[i], "Path " + str(index), "#696969")
+        index += 1
+        
+    index = 0
+    for stop in qr.GetList():
+        for i in range(len(stop.GetAllLat())):
+            addPoint(empty, stop.GetAllLng()[i], stop.GetAllLat()[i], "Stop " + str(stop.GetAllStopId()[i]), "#e01")
+            index += 1
+    
+    # print(empty)
+    
+    # pathLat = query.GetList()[0].Getlat()
+    # pathLng = query.GetList()[0].Getlng()
+    # addLine(empty, pathLng, pathLat, color="#fb1")
+    
+    writeGeoJson(empty)
+    loadGeoJson()
 # http://geojson.io/#data=data:application/json,{"type": "Feature", "geometry": {"type": "Point", "coordinates": [125.6, 10.1]}, "properties": {"name": "Dinagat Islands"}}
