@@ -1,3 +1,4 @@
+from math import sqrt
 from networkx import connected_components
 from pyproj import Proj, Geod
 from shapely import LineString, Point, MultiPoint
@@ -46,7 +47,7 @@ def findNextClosest(pathIndex, currentStop, coordPoints):
 # Export dạng json có kèm theo id, số liệu, lat, lng, tên stop. 
 # Cách tính: cứ có 1 shortest path đi qua stop A thì count(stopA) tăng 1.
 
-def createPath(graph: networkx.MultiDiGraph, stopIdNode: list[str], stopPoints: list[tuple], pathPoints: list[tuple], runningTime):
+def createPath(graph: networkx.MultiDiGraph, stopIdNode: list[str], stopPoints: list[tuple], pathPoints: list[tuple], runningTime, routeVarId):
     pathIndex = -1
     totalLength = LineString(pathPoints).length
     for i in range(len(stopIdNode)):
@@ -58,13 +59,60 @@ def createPath(graph: networkx.MultiDiGraph, stopIdNode: list[str], stopPoints: 
         line = LineString(pathPoints[pathIndex : closestIndex + 1])
         pathIndex = closestIndex
         # print(stopIdNode[i - 1], stopIdNode[i], line.length)
-        graph.add_edge(stopIdNode[i - 1], stopIdNode[i], time = runningTime / totalLength * line.length, dis = line.length)
-        networkx.set_node_attributes(graph, {i - 1: {"coord": stopPoints[i - 1]}})
-        networkx.set_node_attributes(graph, {i: {"coord": stopPoints[i]}})
+        graph.add_edge(stopIdNode[i - 1], stopIdNode[i], time = runningTime / totalLength * line.length, dis = line.length, routeVar = routeVarId)
+        networkx.set_node_attributes(graph, {stopIdNode[i - 1]: {"coord": stopPoints[i - 1]}})
+        # print({stopIdNode[i - 1]: {"coord": stopPoints[i - 1]}})
+        networkx.set_node_attributes(graph, {stopIdNode[i]: {"coord": stopPoints[i]}})
+        # print({stopIdNode[i]: {"coord": stopPoints[i]}})
         
     return graph
 
-def main():
+
+def connectGraph(subGraphs: list[networkx.MultiDiGraph]):
+    connectionPair = []
+    for i in range(len(subGraphs)):
+        for j in range(i + 1, len(subGraphs)):
+            idx = index.Index()
+            
+            nodeCoordI = networkx.get_node_attributes(subGraphs[i], 'coord')
+            
+            iNodes = list(subGraphs[i].nodes)
+            jNodes = list(subGraphs[j].nodes)
+            # print(len(list(subGraphs[i].nodes)))
+            # print(subGraphs[i].nodes[7278]['coord'])
+            # print(subGraphs[i].has_node(7276))
+            
+            for node in iNodes:
+                idx.insert(node, (nodeCoordI[node][0], nodeCoordI[node][1], nodeCoordI[node][0], nodeCoordI[node][1]))
+                
+            # print(jNodes)
+            minDisSoFar = -1
+            connection1 = -1
+            connection2 = -1
+            for node in jNodes:
+                # print(subGraphs[j].nodes[7529]['coord'])
+                x, y = subGraphs[j].nodes[node]['coord']
+                nearestId = list(idx.nearest((x, y, x, y), 1))[0]
+                x1, y1 = nodeCoordI[nearestId]
+                
+                dis = sqrt((x - x1)**2 + (y - y1)**2)
+                if minDisSoFar == -1 or minDisSoFar > dis:
+                    minDisSoFar = dis
+                    connection1 = node
+                    connection2 = nearestId
+                    
+            
+            if connection1 == 1:
+                print("No points found")
+                return
+            
+            # Only connect two stops that are less than 1km apart
+            if minDisSoFar < 1000:
+                connectionPair.append((connection1, connection2, minDisSoFar))
+                
+    return connectionPair
+
+def buildGraph():
     
     allVar = RouteVar.RouteVarQuery()
     allVar.readFromJSON()
@@ -115,31 +163,34 @@ def main():
         for i in range(len(pathCoordLng)):
             pathPoints.append(vn(pathCoordLng[i], pathCoordLat[i]))
         
-        graph = createPath(graph, stopIdNode, stopPoints, pathPoints, var.GetRunningTime())
+        graph = createPath(graph, stopIdNode, stopPoints, pathPoints, var.GetRunningTime(), (routId, routVarId))
             
         networkx.is_path(graph, [75, 3210])
             
     
-    # networkx.draw_spring(graph)
-    # plt.show()
-    # print((allNode))
-    # allNode.sort()
-    # print()
-    # print((allNode))
-    # return
     ug = graph.to_undirected()
     print("Number of subgraphs:", len(list(connected_components(ug))))
-    print(list(connected_components(ug))[1])
+    subGraphs = [graph.subgraph(com) for com in list(component for component in list(connected_components(ug)))]
+    connectionPair = connectGraph(subGraphs)
+    
+    for pair in connectionPair:
+        graph.add_edge(pair[0], pair[1], time = pair[2]/1.6, dis = pair[2], routeVar = "Walk")
+        
+    ug = graph.to_undirected()
+    
+    # print(list(connected_components(ug))[1])
     # for sub in connected_components(ug):
     #     print(ug.subgraph(sub))
     allNode = list(graph.nodes)
     allNode.sort()
     
-    print(graph.nodes[35]['coord'])
+    
+    # print(graph.nodes[35]['coord'])
+    # print(graph[7526][7529][0])
     
     return graph
     # print(allNode)
 
     
 if __name__ == "__main__":
-    main()
+    buildGraph()
