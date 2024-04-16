@@ -33,7 +33,7 @@ def addPoint(dic, lng, lat, name = "", color = "", size = "", symbol = ""):
         
     dic['features'].append(template)
 
-def addLine(dic, lng, lat, name = "", color = "", size = "", symbol = ""):
+def addLine(dic, lng, lat, name = "", color = "", strokeWidth = "", strokeOpacity = ""):
     template = {
       "type": "Feature",
       "properties": {},
@@ -47,13 +47,13 @@ def addLine(dic, lng, lat, name = "", color = "", size = "", symbol = ""):
         template['properties']['name'] = name
       
     if (color != ""):
-        template['properties']['marker-color'] = color
+        template['properties']['stroke'] = color
         
     if (size != ""):
-        template['properties']['marker-size'] = size
+        template['properties']['strok-width'] = strokeWidth
         
     if (symbol != ""):
-        template['properties']['marker-symbol'] = symbol
+        template['properties']['stroke-opacity'] = strokeOpacity
         
     for i in range(len(lat)):
         template['geometry']['coordinates'].append([lng[i], lat[i]])
@@ -75,39 +75,37 @@ def loadGeoJson():
     url = "http://geojson.io/#data=data:application/json," + str(data)
     url = url.replace("\'", "\"")
     print(url)
-    # os.startfile(url)
+    try:
+        os.startfile(url)
+    except:
+        print("URL too long to open a browser")
     
 
 if __name__ == "__main__":
     query = Path.PathQuery()
     query.readFromJSON()
     
-    query.searchByKey(Path.Keys.ROUTEVARID.value, "5")
+    paths = query.searchByKey(Path.Keys.ROUTEVARID.value, "5").GetList()
     
     print(len(query.GetList()))
     
     qr = Stop.VarStopQuery()
     qr.readFromJSON()
-    qr.searchByKey(Stop.Keys.ROUTEVARID.value, "5")
+    stops = qr.searchByKey(Stop.Keys.ROUTEVARID.value, "5").GetList()
     
     # print(len(qr.GetList()))
     index = 0
-    for pathPoint in query.GetList():
+    for pathPoint in paths:
       for i in range(len(pathPoint.Getlat())):
         addPoint(empty, pathPoint.Getlng()[i], pathPoint.Getlat()[i], "Path " + str(index), "#696969")
         index += 1
         
     index = 0
-    for stop in qr.GetList():
+    for stop in stops:
         for i in range(len(stop.GetAllLat())):
             addPoint(empty, stop.GetAllLng()[i], stop.GetAllLat()[i], "Stop " + str(stop.GetAllStopId()[i]), "#e01")
             index += 1
     
-    # print(empty)
-    
-    # pathLat = query.GetList()[0].Getlat()
-    # pathLng = query.GetList()[0].Getlng()
-    # addLine(empty, pathLng, pathLat, color="#fb1")
     
     writeGeoJson(empty)
     loadGeoJson()

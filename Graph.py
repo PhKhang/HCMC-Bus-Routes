@@ -1,10 +1,12 @@
+import heapq
+import json
 from math import sqrt
 from networkx import connected_components
-from pyproj import Proj, Geod
-from shapely import LineString, Point, MultiPoint
+from pyproj import Proj
+from shapely import LineString
 from rtree import index
 from rich import print
-import matplotlib.pyplot as plt
+import time
 import networkx
 import Path
 import Stop
@@ -78,9 +80,6 @@ def connectGraph(subGraphs: list[networkx.MultiDiGraph]):
             
             iNodes = list(subGraphs[i].nodes)
             jNodes = list(subGraphs[j].nodes)
-            # print(len(list(subGraphs[i].nodes)))
-            # print(subGraphs[i].nodes[7278]['coord'])
-            # print(subGraphs[i].has_node(7276))
             
             for node in iNodes:
                 idx.insert(node, (nodeCoordI[node][0], nodeCoordI[node][1], nodeCoordI[node][0], nodeCoordI[node][1]))
@@ -104,7 +103,7 @@ def connectGraph(subGraphs: list[networkx.MultiDiGraph]):
             
             if connection1 == 1:
                 print("No points found")
-                return
+                return connectionPair
             
             # Only connect two stops that are less than 1km apart
             if minDisSoFar < 1000:
@@ -169,28 +168,140 @@ def buildGraph():
             
     
     ug = graph.to_undirected()
-    print("Number of subgraphs:", len(list(connected_components(ug))))
     subGraphs = [graph.subgraph(com) for com in list(component for component in list(connected_components(ug)))]
     connectionPair = connectGraph(subGraphs)
+    
+    # Comment this line to make a full graph
+    # return subGraphs[3]
     
     for pair in connectionPair:
         graph.add_edge(pair[0], pair[1], time = pair[2]/1.6, dis = pair[2], routeVar = "Walk")
         
     ug = graph.to_undirected()
+    print("Number of subgraphs:", len(list(connected_components(ug))))
     
-    # print(list(connected_components(ug))[1])
-    # for sub in connected_components(ug):
-    #     print(ug.subgraph(sub))
     allNode = list(graph.nodes)
     allNode.sort()
     
     
-    # print(graph.nodes[35]['coord'])
-    # print(graph[7526][7529][0])
     
     return graph
-    # print(allNode)
 
     
+# Dijkstra
+def Dijkstra(g: networkx.MultiDiGraph, index = 0):
+    minHeap = [[0, list(g.nodes)[index], list(g.nodes)[index]]]
+    shortestPath = {}
+    while len(minHeap) > 0:
+        weight, cur, fro = heapq.heappop(minHeap)
+        
+        if cur in shortestPath:
+            continue
+        
+        shortestPath[cur] = (fro, weight)
+        
+        for u in networkx.neighbors(g, cur):
+            if u not in shortestPath:
+                heapq.heappush(minHeap, [weight + g[cur][u][0]['time'], u, cur])
+    
+    for i in list(g.nodes):
+        if i not in shortestPath:
+            shortestPath[i] = (-1, -1) 
+            
+    return shortestPath
+
+def DijkstraOld(k: networkx.MultiDiGraph, startingIndex = 0):
+    unvisited = list(k.nodes)
+    visited = [unvisited.pop(startingIndex)]
+    # unvisited = list(networkx.neighbors(k, visited[-1]))
+
+    if len(list(networkx.neighbors(k, visited[-1]))) == 0:
+        # print("No path to any other node found")
+        return
+        
+    shortestPath = {}
+    for node in list(k.nodes):
+        if node == visited[0]:
+            shortestPath[node] = (node, 0)
+        else:
+            shortestPath[node] = (-1, -1)
+            
+    # print(shortestPath)
+
+    while len(unvisited) > 0:
+        nodeToConsider = visited[-1]
+        
+                
+        # Update shortestPath
+        for node in unvisited:
+            dis = shortestPath[node][1]
+            
+            # Skip node that cant be reached directly
+            if networkx.is_path(k, [nodeToConsider, node]) == False:
+                continue
+            
+            weighToHere = shortestPath[nodeToConsider][1]
+            minWeight = k[nodeToConsider][node][0]['time']
+            if dis == -1:
+                shortestPath[node] = (nodeToConsider, minWeight + weighToHere)
+            elif shortestPath[node][1] > minWeight + weighToHere:
+                    shortestPath[node] = (nodeToConsider, minWeight + weighToHere)
+        
+        nextNodeToConsider = -1
+        minWeightSoFar = -1
+        for u in unvisited:
+            # Skip node that are not updated yet
+            if shortestPath[u][1] == -1:
+                continue
+            
+            # print(shortestPath[u][1])
+            if minWeightSoFar == -1:
+                minWeightSoFar = shortestPath[u][1]
+                nextNodeToConsider = u
+                
+            elif shortestPath[u][1] < minWeightSoFar:
+                minWeightSoFar = shortestPath[u][1]
+                nextNodeToConsider = u
+                
+        if nextNodeToConsider == -1:
+            # print("Unreachable node found")
+            return shortestPath
+            
+        
+        # print(shortestPath)
+        # print(f"{nextNodeToConsider=}")
+        
+        unvisited.remove(nextNodeToConsider)
+        visited.append(nextNodeToConsider)
+        # break
+
+    # print()
+    return shortestPath
+    
 if __name__ == "__main__":
-    buildGraph()
+    start = time.time()
+    g = buildGraph()
+    end = time.time()
+    print("Graph built in:", end - start)
+    
+    file = open('shortestPath.json', 'w') 
+    
+    for i in range(len(list(g.nodes))):
+        start = time.time()
+        print("Starting at:", list(g.nodes)[i])
+        
+        shortestPath = Dijkstra(g, i)
+        
+        end = time.time()
+        shortestPath['startingPoint'] = list(g.nodes)[i]
+        print(shortestPath)
+        file.write(json.dumps(shortestPath))
+        print("Calculated in:", end - start)
+        break
+    
+    allNode = list(g.nodes)
+    start = time.time()
+    # for i in range(len(allNode)):
+    networkx.single_source_dijkstra_path_length(g, 35, weight="time")
+    print(time.time() - start)
+    print(networkx.dijkstra_path(g, 35, 7616, weight="time"))

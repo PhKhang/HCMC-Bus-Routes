@@ -2,7 +2,7 @@
 visited = [a]
 unvisited = [b, c, d]
 
-dijkstra = [(a, 0), (b, -1), (c, -1), (d, -1)]
+dijkstra = [(a, 0), (_, -1), (_, -1), (_, -1)]
 while unvisited not empty:
     nodeIdToBranchFrom = visited[-1]
     allNeighbors = [...]
@@ -15,5 +15,4 @@ while unvisited not empty:
         take the least
         
     unvisited.remove(theLeast)
-    
-        
+    visited.append(theLeast)
