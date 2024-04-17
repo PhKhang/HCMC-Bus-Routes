@@ -6,6 +6,7 @@ from pyproj import Proj
 from shapely import LineString
 from rtree import index
 from rich import print
+from rich.progress import track
 import time
 import networkx
 import Path
@@ -278,30 +279,58 @@ def DijkstraOld(k: networkx.MultiDiGraph, startingIndex = 0):
     # print()
     return shortestPath
     
+def countImportance(dijkDict: dict, countDict: dict):
+    ls = []
+    for key in dijkDict:
+        heapq.heappush(ls, [len(dijkDict[key]), key])
+        
+    print(ls)
+    
 if __name__ == "__main__":
-    start = time.time()
-    g = buildGraph()
-    end = time.time()
-    print("Graph built in:", end - start)
+    choice = int(input("1 for starting from scratch, 2 for from file: "))
     
-    file = open('shortestPath.json', 'w') 
-    
-    for i in range(len(list(g.nodes))):
+    g = networkx.MultiDiGraph()
+    if choice == 1:
         start = time.time()
-        print("Starting at:", list(g.nodes)[i])
+        g = buildGraph()
+        end = time.time()
+        print("Graph built in:", end - start)
+        
+    elif choice == 2:
+        g = networkx.read_gml("SavedGraph.bin")
+        print(g)
+    else:
+        print('No choice choosen')
+        
+    # file = open('shortestPath.json', 'w') 
+    allShortestPath = {}
+    for node in list(g.nodes):
+        allShortestPath[node] = {}
+        
+    for i in track(range(len(list(g.nodes))), description = "Running..."):
+        start = time.time()
+        # print("Starting at:", list(g.nodes)[i])
         
         shortestPath = Dijkstra(g, i)
         
         end = time.time()
-        shortestPath['startingPoint'] = list(g.nodes)[i]
-        print(shortestPath)
-        file.write(json.dumps(shortestPath))
-        print("Calculated in:", end - start)
-        break
+        # shortestPath['startingPoint'] = list(g.nodes)[i]
+        allShortestPath[list(g.nodes)[i]] = shortestPath
+        # print("Calculated in:", end - start)
+        
+    networkx.write_gml(g, "SavedGraph.bin")
     
-    allNode = list(g.nodes)
-    start = time.time()
+    # ug = g.to_undirected()
+    # print(len(list(connected_components(ug))))
+    
+    temp = {}
+    # countImportance(allShortestPath, temp)
+    print(allShortestPath['35'])
+    print(networkx.dijkstra_path(g, '35', '7616', weight="time"))
+    
+    
+    # allNode = list(g.nodes)
+    # start = time.time()
     # for i in range(len(allNode)):
-    networkx.single_source_dijkstra_path_length(g, 35, weight="time")
-    print(time.time() - start)
-    print(networkx.dijkstra_path(g, 35, 7616, weight="time"))
+    # networkx.single_source_dijkstra_path_length(g, 35, weight="time")
+    # print(time.time() - start)
