@@ -134,7 +134,7 @@ def buildGraph():
         routId = str(var.GetRouteId())
         routVarId = str(var.GetRouteVarId())
         
-        print(f"Making paths from route: {routId}, var {routVarId}")
+        # print(f"Making paths from route: {routId}, var {routVarId}")
         
         stopResult = findStop.searchByKey(Stop.Keys.ROUTEVARID.value, routVarId).searchByKey(Stop.Keys.ROUTEID.value, routId)
         # print(len(findStop.GetList()))
@@ -165,18 +165,19 @@ def buildGraph():
         
         graph = createPath(graph, stopIdNode, stopPoints, pathPoints, var.GetRunningTime(), (routId, routVarId))
             
-        networkx.is_path(graph, [75, 3210])
-            
     
     ug = graph.to_undirected()
     subGraphs = [graph.subgraph(com) for com in list(component for component in list(connected_components(ug)))]
     connectionPair = connectGraph(subGraphs)
+    print("Connection pairs:", connectionPair)
     
     # Comment this line to make a full graph
     # return subGraphs[3]
     
     for pair in connectionPair:
+        print(pair[0], pair[1], "time = " + str(pair[2]/1.6), "dis = " + str(pair[2]), "routeVar = Walk")
         graph.add_edge(pair[0], pair[1], time = pair[2]/1.6, dis = pair[2], routeVar = "Walk")
+        graph.add_edge(pair[1], pair[0], time = pair[2]/1.6, dis = pair[2], routeVar = "Walk")
         
     ug = graph.to_undirected()
     print("Number of subgraphs:", len(list(connected_components(ug))))
