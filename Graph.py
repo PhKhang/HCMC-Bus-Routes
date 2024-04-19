@@ -326,7 +326,8 @@ if __name__ == "__main__":
     
     temp = {}
     # countImportance(allShortestPath, temp)
-    print(allShortestPath['35'])
+    print(g)
+    # print(allShortestPath['35'])
     print(networkx.dijkstra_path(g, '35', '7616', weight="time"))
     
     

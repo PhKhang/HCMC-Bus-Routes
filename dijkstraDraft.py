@@ -17,6 +17,28 @@ while unvisited not empty:
     unvisited.remove(theLeast)
     visited.append(theLeast)
     
+# ------------------------------------------
+
+A
+
+update A with all (v, v) = 0
+update A with all edges = weight
+
+for k in nodes:
+    for i in nodes:
+        for j in nodes:
+            if i == j:
+                continue
+            
+            if k == i or k == j:
+                continue
+            
+            if A[i][k] == -1 or A[k][j] == -1:
+                continue
+            
+            if A[i][j] == -1 or A[i][j] > A[i][k] + A[k][j]:
+                update = (A[i][k] + A[k][j], k)
+    
 # ------------------------------------------    
 '6885': ('7093', 221.43172040863382),
 '7526': (-1, -1),
