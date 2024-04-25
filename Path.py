@@ -81,7 +81,7 @@ class PathQuery:
         self._data = data
         return data
     
-    def searchByKey(self, key = "", value = ""):
+    def searchByKey(self, key = "", value = "", modify = False):
         items : list[Path] = []
 
         value = unicodedata.normalize("NFC", value)
@@ -103,10 +103,13 @@ class PathQuery:
                 
             pass
         
-        # self._data = items
-        newInstance = PathQuery()
-        newInstance.SetList(items)
-        return newInstance
+        if modify == False:
+            newInstance = PathQuery()
+            newInstance.SetList(items)
+            return newInstance
+        
+        self._data = items
+        return self
     
     def outputAsJSON(self, items : list[Path] = []):
         if (len(items) == 0):

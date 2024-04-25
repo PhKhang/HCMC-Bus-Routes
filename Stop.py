@@ -295,7 +295,7 @@ class VarStopQuery:
         self._data = data
         return data
     
-    def searchByKey(self, key = "", value = ""):
+    def searchByKey(self, key = "", value = "", modify = False):
         items : list[VarStop] = []
         
         value = unicodedata.normalize("NFC", value)
@@ -321,9 +321,13 @@ class VarStopQuery:
             pass
         
         # self._data = items
-        newInstance = VarStopQuery()
-        newInstance.SetList(items)
-        return newInstance
+        if modify == False:
+            newInstance = VarStopQuery()
+            newInstance.SetList(items)
+            return newInstance
+        
+        self._data = items
+        return self
     
     def outputAsJSON(self, items : list[VarStop] = []):
         if (len(items) == 0):

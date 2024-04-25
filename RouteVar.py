@@ -141,7 +141,7 @@ class RouteVarQuery:
         self._data = data
         return data
     
-    def searchByKey(self, key = "", value = ""):
+    def searchByKey(self, key = "", value = "", modify = False):
         items : list[RouteVar] = []
 
         value = unicodedata.normalize("NFC", value)
@@ -162,6 +162,11 @@ class RouteVarQuery:
                     items.append(routeVar)
                 
             pass
+        
+        if modify == False:
+            newInstance = RouteVarQuery()
+            newInstance.SetList(items)
+            return newInstance
         
         self._data = items
         return self
