@@ -308,6 +308,7 @@ if __name__ == "__main__":
     for node in list(g.nodes):
         allShortestPath[node] = {}
         
+    print(networkx.dijkstra_path(g, '35', '7483', weight="time"))
     for i in track(range(len(list(g.nodes))), description = "Running..."):
         start = time.time()
         # print("Starting at:", list(g.nodes)[i])
@@ -328,7 +329,6 @@ if __name__ == "__main__":
     # countImportance(allShortestPath, temp)
     print(g)
     # print(allShortestPath['35'])
-    print(networkx.dijkstra_path(g, '35', '7616', weight="time"))
     
     
     # allNode = list(g.nodes)
