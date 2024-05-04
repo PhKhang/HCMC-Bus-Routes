@@ -221,6 +221,7 @@ def DijkstraOld(k: networkx.MultiDiGraph, startingIndex = 0):
         # print("No path to any other node found")
         return
         
+        
     shortestPath = {}
     for node in list(k.nodes):
         if node == visited[0]:
