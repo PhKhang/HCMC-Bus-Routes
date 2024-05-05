@@ -147,7 +147,7 @@ class RouteVarQuery:
         value = unicodedata.normalize("NFC", value)
 
         if (key == ""):
-            return items;
+            return items
         
         for routeVar in self._data:
             if isinstance(routeVar.dict()[key], list):
@@ -155,10 +155,10 @@ class RouteVarQuery:
                 for i in routeVar.dict()[key]:
                     if unicodedata.normalize("NFC", str(i)) == value:
                         items.append(routeVar)
-                        break;
+                        break
             else:
                 # print("Not a list")
-                if unicodedata.normalize("NFC", str(routeVar.dict()[key])) == value:
+                if unicodedata.normalize("NFC", str(routeVar.dict()[key])).lower() == value.lower():
                     items.append(routeVar)
                 
             pass
@@ -237,10 +237,15 @@ if __name__ == "__main__":
     routeVarQuery = RouteVarQuery()
     routeVarQuery.readFromJSON()
 
-    data = routeVarQuery.searchByKey(Keys.ROUTEVARID.value, "1").GetList()
-    print(len(data))
-    # data = routeVarQuery.searchByKey(Keys.ENDSTOP.value, "THẠNH LỘC").GetList()
+    # data = routeVarQuery.searchByKey(Keys.ROUTEVARID.value, "1").GetList()
     # print(len(data))
+
+    
+    data = routeVarQuery.searchByKey(Keys.ENDSTOP.value, "thạnh lộc").GetList()
+    print(len(data))
+    
+    for da in data:
+        print(da.dict())
 
     
     routeVarQuery.outputAsCSV()

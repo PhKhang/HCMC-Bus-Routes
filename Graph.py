@@ -35,20 +35,6 @@ def findNextClosest(pathIndex, currentStop, coordPoints):
     
     # print("Len: ", len(list(idx.nearest((currentStop[0], currentStop[1], currentStop[0], currentStop[1]), 1))))
     return closestPointId
-            
-
-# 1.Xây dựng graph trong đó: đỉnh là stop, cạnh là các cung liền kề của tuyến xe bus,
-# trọng số là thời gian (second). SV dựa vào giờ bắt đầu của tuyến xe, (lat, lng) để tính được thời gian “tương đối” giữa 2 đỉnh liền kề. SV nhớ đổi (lat, lng) sang (x, y) trước khi thực hiện. Với mỗi cạnh lưu cả trọng số thời gian (second) và trọng số khoảng cách (m).
-
-# 2. Tự cài đặt giải thuật Dijkstra, tìm đường đi ngắn nhất giữa
-# tất cả các cặp đỉnh trong graph (all pairs). Lưu kết quả vào file.
-
-# 3. Chọn (start_stop, end_stop), export dạng json đường đi ngắn nhất giữa 2 stop. 
-# Export kèm theo các path của các route tương ứng để đối chiếu đường đi có phù hợp hay ko?
-
-# 4. Tính và hiển thị top k = 10 (default) stop có độ quan trọng cao nhất. 
-# Export dạng json có kèm theo id, số liệu, lat, lng, tên stop. 
-# Cách tính: cứ có 1 shortest path đi qua stop A thì count(stopA) tăng 1.
 
 def createPath(graph: networkx.MultiDiGraph, stopIdNode: list[str], stopPoints: list[tuple], pathPoints: list[tuple], runningTime, routeVarId):
     pathIndex = -1

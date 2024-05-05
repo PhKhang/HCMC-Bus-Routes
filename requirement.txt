@@ -2,3 +2,4 @@ shapely
 rtree
 networkx
 pyproj
+rich
